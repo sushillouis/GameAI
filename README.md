@@ -1,3 +1,3 @@
 # GameAI
 
-Code and other resources for the GameAI class at UNR
+Unity projects of the GameAI class. Based on NavySim
