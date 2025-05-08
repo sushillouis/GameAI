@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class AIMgr : MonoBehaviour
 {
@@ -25,6 +26,8 @@ public class AIMgr : MonoBehaviour
 
     public bool isPotentialFieldsMovement = false;
     public float potentialDistanceThreshold = 1000;
+    public float obsPotentialDistanceThreshold = 100;
+    public float obsMass = 25;
     public float attractionCoefficient = 500;
     public float attractiveExponent = -1;
     public float repulsiveCoefficient = 60000;
@@ -44,7 +47,10 @@ public class AIMgr : MonoBehaviour
                 pos.y = 0;
                 Entity ent = FindClosestEntInRadius(pos, rClickRadiusSq);
                 if (ent == null) {
-                    HandleMove(SelectionMgr.inst.selectedEntities, pos);
+                    if(interceptDown)
+                        HandleAStarMove(SelectionMgr.inst.selectedEntities, pos);
+                    else
+                        HandleMove(SelectionMgr.inst.selectedEntities, pos);
                 } else {
                     if (interceptDown)
                         HandleIntercept(SelectionMgr.inst.selectedEntities, ent);
@@ -64,6 +70,29 @@ public class AIMgr : MonoBehaviour
             UnitAI uai = entity.GetComponent<UnitAI>();
             AddOrSet(m, uai);
         }
+    }
+
+    public void HandleAStarMove(List<Entity> entities, Vector3 point) {
+        Vector3 centroid = Vector3.zero;
+        for(int i = 0; i < entities.Count; i++) {
+            centroid += entities[i].position;
+            entities[i].GetComponent<UnitAI>().StopAndRemoveAllCommands();
+        }
+        List<Node> path = AStarPather.inst.FindPath(centroid, point);
+        if(path == null) {
+            Debug.Log("No path found");
+            return;
+        }
+        foreach(Entity entity in entities) {
+            entity.GetComponent<UnitAI>().StopAndRemoveAllCommands();
+            foreach(Node node in path) {
+                Move m = new Move(entity, node.position);
+                UnitAI uai = entity.GetComponent<UnitAI>();
+                uai.AddCommand(m);
+            }
+        }
+
+
     }
 
     void AddOrSet(Command c, UnitAI uai)

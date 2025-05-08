@@ -6,22 +6,28 @@ public class GameMgr : MonoBehaviour
 {
     public static GameMgr inst;
     private GameInputs input;
-    private void Awake()
-    {
+    private void Awake()    {
         inst = this;
         input = new GameInputs();
         input.Enable();
+        Random.InitState(1234); // Set a fixed seed for reproducibility
     }
 
     // Start is called before the first frame update
-    void Start()
-    {
-        Vector3 position = Vector3.zero;
-        foreach(GameObject go in EntityMgr.inst.entityPrefabs) {
-            Entity ent = EntityMgr.inst.CreateEntity(go.GetComponent<Entity>().entityType, position, Vector3.zero);
-            ent.isSelected = false;
-            position.x += 200;
+    void Start()    {
+        Vector3 pos = GridMgr.inst.bottomLeft + new Vector3(GridMgr.inst.cellSize*5, 0, GridMgr.inst.cellSize * 5);
+        float x = pos.x;
+        float z = pos.z;
+        for(int j = 0; j < 2; j++) {
+            for(int i = 0; i < 5; i++) {
+                Entity ent = EntityMgr.inst.CreateEntity(EntityType.PilotVessel, pos, Vector3.zero);
+                SelectionMgr.inst.SelectEntity(ent);
+                pos += new Vector3(GridMgr.inst.cellSize / 2, 0, 0);
+            }
+            pos = new Vector3(x, 0, z-GridMgr.inst.cellSize / 2);
         }
+
+
     }
 
     public Vector3 position;

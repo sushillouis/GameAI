@@ -19,6 +19,9 @@ public class Move : Command
         line.gameObject.SetActive(false);
         potentialLine = LineMgr.inst.CreatePotentialLine(entity.position);
         line.gameObject.SetActive(true);
+
+        AIMgr.inst.obsPotentialDistanceThreshold = GridMgr.inst.cellSize * 5;
+
     }
 
     public override void Tick()
@@ -45,9 +48,15 @@ public class Move : Command
         return new DHDS(dhDegrees, entity.maxSpeed);
 
     }
+    public Vector3 attractivePotential = Vector3.zero;
+    public Vector3 potentialSum = Vector3.zero;
+    public Vector3 repulsivePotential = Vector3.zero;
+    public float dh;
+    public float angleDiff;
+    public float cosValue;
+    public float ds;
 
-    public DHDS ComputePotentialDHDS()
-    {
+    public DHDS ComputePotentialDHDS()    {
         Potential p;
         repulsivePotential = Vector3.one; repulsivePotential.y = 0;
         foreach (Entity ent in EntityMgr.inst.entities) {
@@ -60,6 +69,8 @@ public class Move : Command
             }
         }
         //repulsivePotential *= repulsiveCoefficient * Mathf.Pow(repulsivePotential.magnitude, repulsiveExponent);
+        repulsivePotential -= ObstaclesPotentialRepulsion();
+
         attractivePotential = movePosition - entity.position;
         Vector3 tmp = attractivePotential.normalized;
         attractivePotential = tmp * 
@@ -74,17 +85,22 @@ public class Move : Command
 
         return new DHDS(dh, ds);
     }
-    public Vector3 attractivePotential = Vector3.zero;
-    public Vector3 potentialSum = Vector3.zero;
-    public Vector3 repulsivePotential = Vector3.zero;
-    public float dh;
-    public float angleDiff;
-    public float cosValue;
-    public float ds;
 
+    public Vector3 ObstaclesPotentialRepulsion() {
+        Vector3 obsPotential = Vector3.zero;
+        foreach(Node node in GridMgr.inst.obstacleNodes) {
+            Vector3 diff = entity.position - node.position;
+            float dist = diff.magnitude;
+            if(dist < AIMgr.inst.obsPotentialDistanceThreshold) {
+                obsPotential += diff * AIMgr.inst.obsMass *
+                    AIMgr.inst.repulsiveCoefficient * Mathf.Pow(dist, AIMgr.inst.repulsiveExponent);
+            }
+        }
+        obsPotential.y = 0;
+        return obsPotential;
+    }
 
-
-    public float doneDistanceSq = 1000;
+    public float doneDistanceSq = 2000;
     public override bool IsDone()
     {
 
