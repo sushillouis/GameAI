@@ -1,0 +1,36 @@
+XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+/============\/============\
+|............||............|
+|./==\./===\.||./===\./==\.|
+|o|XX|.|XXX|.||.|XXX|.|XX|o|
+|.L==R.L===R.LR.L===R.L==R.|
+|..........................|
+|./==\./\./======\./\./==\.|
+|.L==R.||.L==\/==R.||.L==R.|
+|......||....||....||......|
+L====\.|L==\ || /==R|./====R
+XXXXX|.|/==R LR L==\|.|XXXXX
+XXXXX|.||XXXXXXXXXX||.|XXXXX
+XXXXX|.||X/==--==\X||.|XXXXX
+=====R.LRX|XXXXXX|XLR.L=====
+XXXXXX.XXX|XXXXXX|XXX.XXXXXX
+=====\./\X|XXXXXX|X/\./=====
+XXXXX|.||XL======RX||.|XXXXX
+XXXXX|.||XXXXXXXXXX||.|XXXXX
+XXXXX|.||X/======\X||.|XXXXX
+/====R.LRXL==\/==RXLR.L====\
+|............||............|
+|./==\./===\.||./===\./==\.|
+|.L=\|.L===R.LR.L===R.|/=R.|
+|o..||................||..o|
+L=\.||./\./======\./\.||./=R
+/=R.LR.||.L==\/==R.||.LR.L=\
+|......||....||....||......|
+|./====RL==\.||./==RL====\.|
+|.L========R.LR.L========R.|
+|..........................|
+L==========================R
+XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXX
