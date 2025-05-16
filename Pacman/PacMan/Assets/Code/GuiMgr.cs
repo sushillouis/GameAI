@@ -65,4 +65,11 @@ public class GuiMgr : MonoBehaviour
         ReadyPanel.gameObject.SetActive(false);
     }
 
+
+    public void ShowReady(float duration) {
+        ReadyPanel.gameObject.SetActive(true);
+        readyText.text = "Ready";
+        ShowPanelForTime(ReadyPanel, duration);
+
+    }
 }

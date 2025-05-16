@@ -21,6 +21,8 @@ public class GameMgr : MonoBehaviour {
     public GhostNew[] ghosts;
     public int ghostMultiplier = 1;
 
+    public float newGameSFXDuration = 4f;
+
     public void SetMaxPellets() {
         this.maxPellets = GridMgr.instance.pellets.Count;
     }
@@ -44,7 +46,7 @@ public class GameMgr : MonoBehaviour {
 
         SetScore(0);
         SetLives(3);
-        Invoke(nameof(NewRound), 4f);
+        Invoke(nameof(NewRound), newGameSFXDuration);
 
     }
 
@@ -107,7 +109,8 @@ public class GameMgr : MonoBehaviour {
         if(lives <= 0) {
             GameOver();
         } else {
-            Invoke(nameof(ResetGhostsPacman), 3f);
+            GuiMgr.instance.ShowReady(newGameSFXDuration);
+            Invoke(nameof(ResetGhostsPacman), newGameSFXDuration);
         }
     }
 
@@ -121,7 +124,8 @@ public class GameMgr : MonoBehaviour {
             Debug.Log("All pellets eaten!!!!!");
             SfxMgr.instance.Play(SfxType.Ready);
             pacman.gameObject.SetActive(false);
-            Invoke(nameof(NewRound), 4f);
+            GuiMgr.instance.ShowReady(newGameSFXDuration);
+            Invoke(nameof(NewRound), newGameSFXDuration);
         }
     }
 
