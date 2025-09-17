@@ -227,18 +227,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89e2c18e9a3b8304b8072f70ccb2746d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridXSize: 8000
-  gridZSize: 4000
+  gridXSize: 4000
+  gridZSize: 2000
   bottomLeft: {x: 0, y: 0, z: 0}
   gridDone: 0
   nCellsX: 10
   nCellsZ: 0
   cellSize: 100
   halfCellSize: 0
-  nObstacles: 20
+  nObstacles: 30
   maxObsSize: 5
-  minSize: 100
-  maxSize: 1000
+  minSize: 50
+  maxSize: 500
   obstacleNodes: []
   path: []
   ObstaclePrefab: {fileID: 4875759377122808211, guid: 6f8105331f3b8ba4ebd57c2bd0304a3b,
@@ -2818,14 +2818,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1576919499}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalRotation: {x: 0.39394197, y: 0, z: 0, w: 0.91913533}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1664575455}
   m_Father: {fileID: 358051249}
-  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 46.4, y: 0, z: 0}
 --- !u!1 &1579351794
 GameObject:
   m_ObjectHideFlags: 0
@@ -3835,7 +3835,7 @@ Transform:
   m_GameObject: {fileID: 1991371576}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3000, y: 580, z: -2500}
+  m_LocalPosition: {x: -3000, y: 1000, z: -2500}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3944,6 +3944,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4234856571871539980, guid: 0b142338381541d4a8bd3360a7df145e,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7191540881604954376, guid: 0b142338381541d4a8bd3360a7df145e,
         type: 3}
