@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breakthrough Tournament</title>
+<style>
+  :root {
+    --bg: #12151a; --panel: #1b1f26; --text: #e8eaed; --muted: #9aa0a6; --line: #2c313a;
+    --light: #e9d3ac; --dark: #b07d4f; --frame: #4a2f1b; --hl: #f2c94c; --win: #5cc98b; --cap: #ff6b4a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: radial-gradient(ellipse at top, #1d232c, var(--bg) 60%) fixed; color: var(--text);
+         font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; min-height: 100vh; }
+  header { padding: 14px 24px; border-bottom: 1px solid var(--line); display: flex;
+           justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: .3px; }
+  .hright { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  #status { color: var(--muted); }
+  #soundBtn { background: #2a3140; color: var(--text); border: 1px solid #3a4352; border-radius: 6px;
+              padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; }
+  #soundBtn.on { background: #234434; border-color: #2f6b4c; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 28px; padding: 24px;
+         max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 16px; } }
+
+  .players { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 12px;
+             gap: 12px; width: min(100%, 74vh); }
+  .side { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600; min-width: 0;
+          padding: 6px 12px; border-radius: 999px; border: 2px solid transparent; transition: all .3s; }
+  .side span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .side small { font-weight: 500; color: var(--muted); font-size: 13px; }
+  .side.turn { border-color: var(--hl); box-shadow: 0 0 18px rgba(242, 201, 76, .35); }
+  .side.turn::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--hl);
+                      animation: pulse 1s infinite ease-in-out; }
+  @keyframes pulse { 50% { opacity: .2; transform: scale(.6); } }
+  .side svg { width: 28px; height: 28px; flex: none; }
+
+  .frame { width: min(100%, 74vh); margin: 0 auto; padding: 14px; border-radius: 10px;
+           background: linear-gradient(145deg, #6b4428, var(--frame) 45%, #2e1c10);
+           box-shadow: 0 18px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.15); }
+  #board { position: relative; width: 100%; aspect-ratio: 1; border-radius: 3px; overflow: hidden;
+           box-shadow: inset 0 0 0 1px rgba(0,0,0,.4); }
+  #squares { position: absolute; inset: 0; display: grid; }
+  .sq { position: relative; }
+  .sq.l { background: linear-gradient(135deg, #f0dcb6, var(--light)); }
+  .sq.d { background: linear-gradient(135deg, #bb875a, var(--dark)); }
+  .sq.from::after, .sq.to::after { content: ""; position: absolute; inset: 0; background: rgba(242, 201, 76, .42); }
+  .sq.to::after { box-shadow: inset 0 0 0 3px rgba(242, 201, 76, .9); }
+  .coord { position: absolute; font-size: 11px; font-weight: 600; color: rgba(60, 35, 15, .65); z-index: 1; }
+  .coord.f { bottom: 2px; right: 4px; } .coord.r { top: 2px; left: 4px; }
+
+  #pieces { position: absolute; inset: 0; pointer-events: none; }
+  .pc { position: absolute; display: flex; align-items: center; justify-content: center; will-change: transform; }
+  .pc svg { width: 82%; height: 82%; filter: drop-shadow(0 4px 3px rgba(0,0,0,.45)); }
+  .pc.moving { z-index: 5; transition: transform .5s cubic-bezier(.3, .7, .3, 1); }
+  .pc.moving svg { animation: lift .5s ease; }
+  @keyframes lift { 40% { transform: scale(1.18) translateY(-6%); filter: drop-shadow(0 14px 8px rgba(0,0,0,.4)); } }
+  .pc.land svg { animation: land .35s ease; }
+  @keyframes land { 30% { transform: scale(.92, 1.06); } }
+  .pc.ghost { z-index: 4; animation: shatter .55s ease-in forwards; }
+  @keyframes shatter { to { transform: scale(1.5) rotate(25deg); opacity: 0; filter: blur(2px); } }
+  .ring { position: absolute; border-radius: 50%; border: 3px solid var(--cap); z-index: 6;
+          animation: ring .6s ease-out forwards; }
+  @keyframes ring { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+  .spark { position: absolute; width: 8px; height: 8px; margin: -4px; border-radius: 50%; z-index: 6;
+           background: radial-gradient(circle, #fff3c4, var(--cap)); animation: spark .7s ease-out forwards; }
+  @keyframes spark { to { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; } }
+
+  #banner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; background: rgba(10, 12, 16, .62); z-index: 10; opacity: 0;
+            pointer-events: none; transition: opacity .5s; text-align: center; padding: 20px; }
+  #banner.show { opacity: 1; }
+  #banner .big { font-size: clamp(22px, 4.2vmin, 46px); font-weight: 800; color: #fff; overflow-wrap: anywhere;
+                 text-shadow: 0 3px 12px rgba(0,0,0,.6); }
+  #banner.show .big { animation: pop .6s cubic-bezier(.2, 1.6, .4, 1); }
+  #banner .why { margin-top: 8px; color: #d6dae0; font-size: 18px; }
+  @keyframes pop { from { transform: scale(.4); } }
+
+  #meta { color: var(--muted); margin-top: 12px; text-align: center; font-variant-numeric: tabular-nums; }
+  aside section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 18px; }
+  h2 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  td, th { padding: 5px 4px; text-align: left; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: 13px; }
+  td.n, th.n { text-align: right; }
+  tr:last-child td { border-bottom: none; }
+  #results td { font-size: 14px; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <radialGradient id="gW" cx="35%" cy="28%" r="80%">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#ece5d6"/><stop offset="1" stop-color="#b9ae98"/>
+    </radialGradient>
+    <radialGradient id="gB" cx="35%" cy="28%" r="80%">
+      <stop offset="0" stop-color="#6d7380"/><stop offset=".45" stop-color="#2b2f37"/><stop offset="1" stop-color="#0c0d10"/>
+    </radialGradient>
+    <symbol id="pawn" viewBox="0 0 100 100">
+      <!-- base, stem, collar and head of a pawn -->
+      <path d="M22 90 Q22 80 32 78 L68 78 Q78 80 78 90 Z"/>
+      <path d="M34 78 Q38 66 42 58 L58 58 Q62 66 66 78 Z"/>
+      <ellipse cx="50" cy="56" rx="17" ry="5"/>
+      <circle cx="50" cy="36" r="16"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header>
+  <h1>Breakthrough Tournament</h1>
+  <div class="hright">
+    <div id="status">Connecting...</div>
+    <button id="soundBtn" type="button">Sound: off</button>
+  </div>
+</header>
+<main>
+  <div>
+    <div class="players">
+      <div class="side" id="pw"><svg viewBox="0 0 100 100"><use href="#pawn" fill="url(#gW)" stroke="#5a5040" stroke-width="2.5"/></svg><span id="nw">White</span></div>
+      <div class="side" id="pb"><span id="nb">Black</span><svg viewBox="0 0 100 100"><use href="#pawn" fill="url(#gB)" stroke="#000" stroke-width="2.5"/></svg></div>
+    </div>
+    <div class="frame">
+      <div id="board">
+        <div id="squares"></div>
+        <div id="pieces"></div>
+        <div id="banner"><div class="big" id="bannerBig"></div><div class="why" id="bannerWhy"></div></div>
+      </div>
+    </div>
+    <div id="meta"></div>
+  </div>
+  <aside>
+    <section><h2>Standings</h2><table id="standings"></table></section>
+    <section><h2>Results</h2><table id="results"></table></section>
+  </aside>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const PIECE = {
+  W: '<svg viewBox="0 0 100 100"><use href="#pawn" fill="url(#gW)" stroke="#5a5040" stroke-width="2.5"/></svg>',
+  B: '<svg viewBox="0 0 100 100"><use href="#pawn" fill="url(#gB)" stroke="#000" stroke-width="2.5"/></svg>',
+};
+
+// ------------------------------------------------------------------ sound (synthesized, no files)
+let audio = null, soundOn = false;
+let wantSound = false;
+try { wantSound = localStorage.getItem("bt-sound") === "on"; } catch (e) {}
+function setSound(on) {
+  soundOn = on;
+  if (on && !audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+  if (on && audio.state === "suspended") audio.resume();
+  $("soundBtn").textContent = on ? "Sound: on" : "Sound: off";
+  $("soundBtn").classList.toggle("on", on);
+  try { localStorage.setItem("bt-sound", on ? "on" : "off"); } catch (e) {}
+}
+$("soundBtn").onclick = e => { e.stopPropagation(); setSound(!soundOn); };
+// Browsers only allow audio after a click, so a remembered "on" waits for the first click anywhere.
+if (wantSound) document.addEventListener("click", () => { if (!soundOn) setSound(true); }, {once: true});
+
+function noise(dur, freq, q, gain, when) {
+  const t = audio.currentTime + when;
+  const buf = audio.createBuffer(1, Math.ceil(audio.sampleRate * dur), audio.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+  const src = audio.createBufferSource(); src.buffer = buf;
+  const f = audio.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q;
+  const g = audio.createGain(); g.gain.value = gain;
+  src.connect(f).connect(g).connect(audio.destination); src.start(t);
+}
+function tone(f0, f1, dur, type, gain, when) {
+  const t = audio.currentTime + when;
+  const o = audio.createOscillator(); o.type = type;
+  o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  const g = audio.createGain();
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(audio.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const LAND = .42;  // seconds until the sliding piece lands
+const sfx = {
+  move()    { tone(420, 180, .12, "sine", .5, LAND); noise(.06, 2400, 1.5, .5, LAND); },   // wooden "tock"
+  capture() { tone(220, 60, .35, "triangle", .7, LAND); noise(.25, 900, .8, .9, LAND); noise(.08, 3500, 2, .5, LAND + .03); },
+  win()     { [523, 659, 784, 1047].forEach((f, i) => tone(f, f, i === 3 ? .8 : .35, "triangle", .35, i * .13)); },
+};
+function play(name) { if (soundOn && audio) try { sfx[name](); } catch (e) {} }
+
+// ------------------------------------------------------------------ board drawing
+let cur = null;   // what is currently drawn: {gameNo, moveNo, board, winner}
+
+function buildSquares(rows, cols, last) {
+  const sq = $("squares");
+  sq.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  sq.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  $("board").style.aspectRatio = `${cols} / ${rows}`;
+  const m = last ? last.match(/^([a-z]\d+)([a-z]\d+)$/) : null;
+  let html = "";
+  for (let i = 0; i < rows; i++) {
+    const r = rows - 1 - i;                        // the first row of the board string is the top rank
+    for (let c = 0; c < cols; c++) {
+      const name = String.fromCharCode(97 + c) + (r + 1);
+      let cls = "sq " + ((r + c) % 2 ? "l" : "d");
+      if (m && name === m[1]) cls += " from";
+      if (m && name === m[2]) cls += " to";
+      html += `<div class="${cls}">`;
+      if (c === 0) html += `<span class="coord r">${r + 1}</span>`;
+      if (r === 0) html += `<span class="coord f">${String.fromCharCode(97 + c)}</span>`;
+      html += "</div>";
+    }
+  }
+  sq.innerHTML = html;
+}
+
+function placeAt(el, i, rows, cols) {
+  el.style.width = 100 / cols + "%"; el.style.height = 100 / rows + "%";
+  el.style.left = (i % cols) * 100 / cols + "%"; el.style.top = Math.floor(i / cols) * 100 / rows + "%";
+}
+
+function pieceEl(ch, i, rows, cols) {
+  const el = document.createElement("div");
+  el.className = "pc"; placeAt(el, i, rows, cols);
+  el.innerHTML = PIECE[ch];
+  return el;
+}
+
+function drawPieces(board, rows, cols) {
+  const layer = $("pieces"); layer.innerHTML = "";
+  const byIndex = {};
+  for (let i = 0; i < board.length; i++) {
+    if (board[i] === "W" || board[i] === "B") layer.appendChild(byIndex[i] = pieceEl(board[i], i, rows, cols));
+  }
+  return byIndex;
+}
+
+function idx(sq, rows, cols) {              // square name -> index in the board string
+  const c = sq.charCodeAt(0) - 97, r = parseInt(sq.slice(1), 10) - 1;
+  return (rows - 1 - r) * cols + c;
+}
+
+function burst(i, rows, cols) {
+  const layer = $("pieces");
+  const ring = document.createElement("div"); ring.className = "ring"; placeAt(ring, i, rows, cols);
+  layer.appendChild(ring);
+  const cx = ((i % cols) + .5) * 100 / cols, cy = (Math.floor(i / cols) + .5) * 100 / rows;
+  const size = layer.clientWidth / cols;
+  for (let k = 0; k < 16; k++) {
+    const s = document.createElement("div"); s.className = "spark";
+    const a = Math.random() * Math.PI * 2, d = size * (.5 + Math.random() * .7);
+    s.style.left = cx + "%"; s.style.top = cy + "%";
+    s.style.setProperty("--dx", Math.cos(a) * d + "px"); s.style.setProperty("--dy", Math.sin(a) * d + "px");
+    s.style.animationDelay = Math.random() * .08 + "s";
+    layer.appendChild(s);
+  }
+  setTimeout(() => { ring.remove(); layer.querySelectorAll(".spark").forEach(x => x.remove()); }, 900);
+}
+
+function animateMove(prevBoard, g) {
+  const {rows, cols} = g;
+  const m = g.last.match(/^([a-z]\d+)([a-z]\d+)$/);
+  const from = idx(m[1], rows, cols), to = idx(m[2], rows, cols);
+  const victim = g.captured ? prevBoard[to] : null;
+  const pieces = drawPieces(g.board, rows, cols);
+  const mover = pieces[to];
+  if (!mover) return;
+  if (victim === "W" || victim === "B") {           // keep the captured piece briefly so it can shatter
+    const ghost = pieceEl(victim, to, rows, cols);
+    ghost.style.animationDelay = LAND + "s"; ghost.classList.add("ghost");
+    $("pieces").insertBefore(ghost, mover);
+    setTimeout(() => { burst(to, rows, cols); }, LAND * 1000);
+    setTimeout(() => ghost.remove(), 1200);
+  }
+  const dx = ((from % cols) - (to % cols)) * 100, dy = (Math.floor(from / cols) - Math.floor(to / cols)) * 100;
+  mover.style.transform = `translate(${dx}%, ${dy}%)`;
+  mover.getBoundingClientRect();                     // commit the start position before transitioning
+  mover.classList.add("moving");
+  mover.style.transform = "translate(0, 0)";
+  setTimeout(() => { mover.classList.remove("moving"); mover.classList.add("land"); }, 500);
+  play(g.captured ? "capture" : "move");
+}
+
+function showBanner(text, why) {
+  $("bannerBig").textContent = text; $("bannerWhy").textContent = why || "";
+  $("banner").classList.toggle("show", !!text);
+}
+
+function renderGame(s) {
+  const g = s.game;
+  if (!g) {
+    const set = s.settings || {};
+    const rows = set.rows || 8, cols = set.cols || 8;
+    if (!cur) { buildSquares(rows, cols, null); drawPieces("", rows, cols); cur = {gameNo: -1}; }
+    $("meta").textContent = s.players.length ? "Connected: " + s.players.join(", ") : "No players connected yet";
+    return;
+  }
+  const sameGame = cur && cur.gameNo === s.gameNo;
+  if (!sameGame || g.moveNo !== cur.moveNo || g.board !== cur.board) {
+    buildSquares(g.rows, g.cols, g.last);
+    if (sameGame && g.moveNo === cur.moveNo + 1 && g.last) animateMove(cur.board, g);
+    else drawPieces(g.board, g.rows, g.cols);
+    if (!sameGame) showBanner("");
+  }
+  if (g.winner && !(sameGame && cur.winner)) {
+    const name = g.winner === "WHITE" ? g.white : g.black;
+    const shownFor = s.gameNo;
+    setTimeout(() => { if (cur.gameNo === shownFor) { showBanner(`${name} wins!`, g.reason); play("win"); } },
+               sameGame ? 800 : 0);
+  }
+  cur = {gameNo: s.gameNo, moveNo: g.moveNo, board: g.board, winner: g.winner};
+
+  const humans = g.humans || [];
+  $("nw").innerHTML = esc(g.white) + (humans.includes(g.white) ? " <small>(human)</small>" : "");
+  $("nb").innerHTML = esc(g.black) + (humans.includes(g.black) ? " <small>(human)</small>" : "");
+  $("pw").classList.toggle("turn", !g.winner && g.turn === "W");
+  $("pb").classList.toggle("turn", !g.winner && g.turn === "B");
+  $("meta").textContent = `Move ${g.moveNo}` + (g.last ? ` · last: ${g.last}` : "");
+}
+
+function render(s) {
+  const prog = s.totalGames ? ` · game ${s.gameNo} of ${s.totalGames}` : "";
+  const set = s.settings || {};
+  $("status").textContent = s.status + prog + (set.time ? ` · ${set.time}s per move` : "");
+  renderGame(s);
+  const st = s.standings.length ? s.standings
+           : s.players.map(n => ({name: n, wins: 0, losses: 0, played: 0}));
+  $("standings").innerHTML = "<tr><th>#</th><th>Player</th><th class=n>W</th><th class=n>L</th><th class=n>P</th></tr>" +
+    (st.map((p, i) => `<tr><td>${i + 1}</td><td>${esc(p.name)}</td><td class=n>${p.wins}</td><td class=n>${p.losses}</td><td class=n>${p.played}</td></tr>`).join("")
+     || "<tr><td colspan=5 class=muted>Waiting for players</td></tr>");
+  $("results").innerHTML = s.results.slice().reverse().slice(0, 12).map(r =>
+    `<tr><td class=muted>${r.no}</td><td>${esc(r.white)} <span class=muted>vs</span> ${esc(r.black)}</td><td><b>${esc(r.winner)}</b></td><td class="n muted">${r.moves}</td></tr>`
+  ).join("") || "<tr><td class=muted>No games yet</td></tr>";
+}
+
+// Served by server.py the page asks its own origin; opened straight from disk it tries the server on this machine.
+const FROM_FILE = location.protocol === "file:";
+const STATE_URL = FROM_FILE ? "http://localhost:8080/state" : "/state";
+
+async function poll() {
+  try {
+    const res = await fetch(STATE_URL, {cache: "no-store"});
+    render(await res.json());
+  } catch (e) {
+    $("status").textContent = FROM_FILE
+      ? "Server not reachable. Start server.py, then open http://localhost:8080/ in your browser"
+      : "Server not reachable";
+  }
+  setTimeout(poll, 250);
+}
+poll();
+</script>
+</body>
+</html>
