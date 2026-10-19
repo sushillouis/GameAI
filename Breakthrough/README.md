@@ -14,7 +14,6 @@ Python 3.8+, standard library only. Nothing to install.
 | `human_client.py` | anyone | play against the AIs yourself, in a window with a clickable board |
 | `client.py` | students | starter client: networking, board parsing and move generation done; plays random moves |
 | `STUDENT_GUIDE.md` | students | rules, how to use the starter client, and the protocol for other languages |
-| `Breakthrough_Assignment_Handout.docx` | students | the assignment handout |
 
 Give students `client.py`, `STUDENT_GUIDE.md`, and also `server.py` + `viewer.html` so they can test at home.
 
